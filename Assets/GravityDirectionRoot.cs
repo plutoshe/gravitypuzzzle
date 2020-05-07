@@ -35,6 +35,7 @@ public class GravityDirectionRoot : MonoBehaviour
     private GravityDirection m_gravityDirection;
     private Quaternion fromRotation, toRotation;
     private float ratio;
+
     public bool IsRotating = false;
     public float m_RotateSpeed = 1f;
     // Start is called before the first frame update

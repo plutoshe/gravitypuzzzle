@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class GravityController : MonoBehaviour
@@ -9,10 +10,16 @@ public class GravityController : MonoBehaviour
     public float m_UnitMovement = 1.0f;
     private Rigidbody m_rigidbody;
     private GravityDirectionRoot m_rotationRoot;
+    private float camPitch = 0;
+    public float m_SpeedH = 2;
+    private float camYaw = 0;
+    public float m_SpeedV = 2;
+    public Camera m_Camera;
     void Start()
     {
         m_rigidbody = GetComponent<Rigidbody>();
         m_rotationRoot = transform.parent.GetComponent<GravityDirectionRoot>();
+        m_Camera = GetComponentInChildren<Camera>();
     }
 
     // Update is called once per frame
@@ -50,6 +57,16 @@ public class GravityController : MonoBehaviour
         {
             m_rigidbody.AddRelativeForce(UpdateByGravity(Time.deltaTime) * m_rigidbody.mass);
             transform.localPosition += TackleInput() * Time.deltaTime;
+            camYaw += m_SpeedH * Input.GetAxis("Mouse X");
+            camPitch -= m_SpeedV * Input.GetAxis("Mouse Y");
+            camPitch = Mathf.Clamp(camPitch, -90, 90);
+
+            if (m_Camera)
+            {
+                print(camYaw);
+                m_Camera.transform.localEulerAngles = new Vector3(camPitch, camYaw, 0);
+            }
         }
+        
     }
 }
