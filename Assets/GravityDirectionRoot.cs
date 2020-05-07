@@ -5,7 +5,7 @@ using UnityEngine.Experimental.PlayerLoop;
 
 public enum GravityDirection
 {
-    XPositive,
+    XPositive = 0,
     XNegtive,
     YPositive,
     YNegtive,
@@ -15,29 +15,72 @@ public enum GravityDirection
 
 public class GravityDirectionRoot : MonoBehaviour
 {
-    public GravityDirection m_GravityDirection;
+    
+    public GravityDirection m_GravityDirection
+    {
+        get
+        {
+            return m_gravityDirection;
+        }
+        set
+        {
+            if (!IsRotating)
+            {
+                m_gravityDirection = value;
+                UpdateRotationByGravityDirection(m_gravityDirection);
+            }
+        }
+    }
+    [SerializeField]
+    private GravityDirection m_gravityDirection;
+    private Quaternion fromRotation, toRotation;
+    private float ratio;
+    public bool IsRotating = false;
+    public float m_RotateSpeed = 1f;
     // Start is called before the first frame update
     void Start()
     {
+        
         UpdateRotationByGravityDirection(m_GravityDirection);
+        ratio = 1;
+        IsRotating = false;
+        transform.rotation = toRotation;
     }
-    Vector3 UpdateRotationByGravityDirection(GravityDirection i_direction)
+    void UpdateRotationByGravityDirection(GravityDirection i_direction)
     {
+        ratio = 0;
+        IsRotating = true;
         switch (i_direction)
         {
-            case GravityDirection.XPositive: return new Vector3(1, 0, 0);
-            case GravityDirection.XNegtive: return new Vector3(-1, 0, 0);
-            case GravityDirection.YPositive: return new Vector3(0, 1, 0);
-            case GravityDirection.YNegtive: return new Vector3(0, -1, 0);
-            case GravityDirection.ZPositive: return new Vector3(0, 0, 1);
-            case GravityDirection.ZNegtive: return new Vector3(0, 0, -1);
+            case GravityDirection.XPositive: fromRotation = transform.rotation; toRotation = Quaternion.Euler(-90, 0, 90); break;
+            case GravityDirection.XNegtive: fromRotation = transform.rotation; toRotation = Quaternion.Euler(-90, 0, -90); break;
+            case GravityDirection.YPositive: fromRotation = transform.rotation; toRotation = Quaternion.Euler(180, 0, 0); break;
+            case GravityDirection.YNegtive: fromRotation = transform.rotation; toRotation = Quaternion.Euler(0, 0, 0); break;
+            case GravityDirection.ZNegtive: fromRotation = transform.rotation; toRotation = Quaternion.Euler(90, 0, 0); break;
+            case GravityDirection.ZPositive: fromRotation = transform.rotation; toRotation = Quaternion.Euler(-90, 0, 0); break;
         }
-        return new Vector3(0, 0, 0);
     }
     // Update is called once per frame
     void ChangeGravityDirection(GravityDirection i_direction)
     {
         m_GravityDirection = i_direction;
-        UpdateRotationByGravityDirection(m_GravityDirection);
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            m_GravityDirection++;
+        }
+        if (IsRotating)
+        {
+            ratio += Time.deltaTime * m_RotateSpeed;
+            if (ratio > 1)
+            {
+                ratio = 1;
+                IsRotating = false;
+            }
+            transform.rotation = Quaternion.Slerp(fromRotation, toRotation, ratio);   
+        }
     }
 }

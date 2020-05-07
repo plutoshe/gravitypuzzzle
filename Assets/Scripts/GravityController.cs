@@ -6,10 +6,13 @@ public class GravityController : MonoBehaviour
 {
     // Start is called before the first frame update
     public float m_NormalGravityAccleration = 9.8f;
+    public float m_UnitMovement = 1.0f;
     private Rigidbody m_rigidbody;
+    private GravityDirectionRoot m_rotationRoot;
     void Start()
     {
         m_rigidbody = GetComponent<Rigidbody>();
+        m_rotationRoot = transform.parent.GetComponent<GravityDirectionRoot>();
     }
 
     // Update is called once per frame
@@ -18,8 +21,35 @@ public class GravityController : MonoBehaviour
         return i_deltaTime * new Vector3(0, -m_NormalGravityAccleration, 0);
     }
 
+    private Vector3 TackleInput()
+    {
+        Vector3 movement = new Vector3(0, 0, 0);
+        if (Input.GetKey(KeyCode.W))
+        {
+            movement.z += m_UnitMovement;
+        }
+        if (Input.GetKey(KeyCode.S))
+        {
+            movement.z -= m_UnitMovement;
+        }
+        if (Input.GetKey(KeyCode.A))
+        {
+            movement.x -= m_UnitMovement;
+        }
+        if (Input.GetKey(KeyCode.D))
+        {
+            movement.x += m_UnitMovement;
+        }
+        return movement;
+    }
+
     private void Update()
     {
-        m_rigidbody.AddForce(UpdateByGravity(Time.deltaTime) * m_rigidbody.mass);
+
+        if (m_rotationRoot == null || !m_rotationRoot.IsRotating)
+        {
+            m_rigidbody.AddRelativeForce(UpdateByGravity(Time.deltaTime) * m_rigidbody.mass);
+            transform.localPosition += TackleInput() * Time.deltaTime;
+        }
     }
 }
