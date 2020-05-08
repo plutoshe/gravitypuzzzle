@@ -19,12 +19,19 @@ public class ChangeGravityTrigger : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        print(other.name);
         var gravityRoot = other.GetComponentInParent<GravityDirectionRoot>();
         if (gravityRoot != null)
         {
             gravityRoot.m_CurrentLinkGravityInteraction = gameObject;
             gravityRoot.m_isReadyChangeDirection = true;
             gravityRoot.m_nextGravityDirection = m_changedDirection;
+            if (gravityRoot.CompareTag("RotationCube"))
+            {
+                gravityRoot.m_isReadyChangeDirection = false;
+                gravityRoot.m_GravityDirection = m_changedDirection;
+                gravityRoot.StopRotation();
+            }
         }
     }
     private void OnTriggerExit(Collider other)
@@ -36,5 +43,6 @@ public class ChangeGravityTrigger : MonoBehaviour
             gravityRoot.m_nextGravityDirection = gravityRoot.m_GravityDirection;
         }
     }
+
 
 }

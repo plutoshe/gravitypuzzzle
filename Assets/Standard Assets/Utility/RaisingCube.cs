@@ -29,11 +29,12 @@ public class RaisingCube : MonoBehaviour, IInteractionCube, ITriggerComparison
     {
         m_player = i_player;
         m_followingOffset = (transform.parent.position - m_player.m_Camera.transform.position).magnitude;
-        
+        GetComponentInParent<cubePhysicsController>().isHolding = true;
         m_isFollowing = true;
     }
     public void EndInteraction()
     {
+        GetComponentInParent<cubePhysicsController>().isHolding = false;
         m_isFollowing = false;
     }
 

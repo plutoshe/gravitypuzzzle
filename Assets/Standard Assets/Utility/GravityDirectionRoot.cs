@@ -33,7 +33,7 @@ public class GravityDirectionRoot : MonoBehaviour
         }
     }
     [SerializeField]
-    private GravityDirection m_gravityDirection;
+    public GravityDirection m_gravityDirection;
     public GravityDirection m_nextGravityDirection;
     public GameObject m_CurrentLinkGravityInteraction;
     private Quaternion fromRotation, toRotation;
@@ -42,19 +42,23 @@ public class GravityDirectionRoot : MonoBehaviour
 
     public bool IsRotating = false;
     public float m_RotateSpeed = 1f;
+
+    public void StopRotation()
+    {
+        ratio = 1;
+        IsRotating = false;
+        transform.rotation = toRotation;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         
         UpdateRotationByGravityDirection(m_GravityDirection);
-        ratio = 1;
-        IsRotating = false;
-        transform.rotation = toRotation;
+        StopRotation();
     }
-    void UpdateRotationByGravityDirection(GravityDirection i_direction)
+    void GetRotationReady(GravityDirection i_direction)
     {
-        ratio = 0;
-        IsRotating = true;
         switch (i_direction)
         {
             case GravityDirection.XPositive: fromRotation = transform.rotation; toRotation = Quaternion.Euler(-90, 0, 90); break;
@@ -64,6 +68,13 @@ public class GravityDirectionRoot : MonoBehaviour
             case GravityDirection.ZNegtive: fromRotation = transform.rotation; toRotation = Quaternion.Euler(90, 0, 0); break;
             case GravityDirection.ZPositive: fromRotation = transform.rotation; toRotation = Quaternion.Euler(-90, 0, 0); break;
         }
+    }
+
+    void UpdateRotationByGravityDirection(GravityDirection i_direction)
+    {
+        ratio = 0;
+        IsRotating = true;
+        GetRotationReady(i_direction);
     }
     // Update is called once per frame
     void ChangeGravityDirection(GravityDirection i_direction)
@@ -87,6 +98,7 @@ public class GravityDirectionRoot : MonoBehaviour
                 ratio = 1;
                 IsRotating = false;
             }
+            print(toRotation + "," + ratio);
             transform.rotation = Quaternion.Slerp(fromRotation, toRotation, ratio);   
         }
     }

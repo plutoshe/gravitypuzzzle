@@ -8,9 +8,11 @@ public class cubePhysicsController : MonoBehaviour
     private Rigidbody m_rigidbody;
     private GravityDirectionRoot m_rotationRoot;
     private Transform downDetection;
+    public bool isHolding;
     // Use this for initialization
     void Start()
     {
+        isHolding = false;
         m_rigidbody = GetComponent<Rigidbody>();
         m_rotationRoot = transform.parent.GetComponent<GravityDirectionRoot>();
         downDetection = transform.Find("Down");
@@ -32,8 +34,16 @@ public class cubePhysicsController : MonoBehaviour
     private void UpdateCharacterPosition(Vector3 direction, Vector3 startPosition, float innerDist)
     {
         RaycastHit hit;
+        if (CompareTag("RotationCube"))
+        {
+            print("!!!!");
+        }
         if (Physics.Raycast(startPosition, direction, out hit, direction.magnitude + innerDist + 1, m_CollisionMask))
         {
+            if (CompareTag("RotationCube"))
+            {
+                print(hit.distance + "," + direction.magnitude + "," + innerDist);
+            }
             if (hit.distance < direction.magnitude + innerDist)
             {
                 transform.parent.position += direction.normalized * (hit.distance - innerDist);
@@ -55,7 +65,7 @@ public class cubePhysicsController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (m_rotationRoot == null || !m_rotationRoot.IsRotating)
+        if (m_rotationRoot != null && !m_rotationRoot.IsRotating && !isHolding)
         {
 
             if (!isGrounded())
