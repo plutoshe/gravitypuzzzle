@@ -16,7 +16,7 @@ public class cubePhysicsController : MonoBehaviour
         m_rigidbody = GetComponent<Rigidbody>();
         m_rotationRoot = transform.parent.GetComponent<GravityDirectionRoot>();
         downDetection = transform.Find("Down");
-        m_CollisionMask = LayerMask.GetMask("Level") | LayerMask.GetMask("Default");
+        m_CollisionMask = LayerMask.GetMask("Level") | LayerMask.GetMask("Default") | LayerMask.GetMask("Interaction");
     }
     private bool isGrounded()
     {
@@ -34,16 +34,9 @@ public class cubePhysicsController : MonoBehaviour
     private void UpdateCharacterPosition(Vector3 direction, Vector3 startPosition, float innerDist)
     {
         RaycastHit hit;
-        if (CompareTag("RotationCube"))
-        {
-            print("!!!!");
-        }
+
         if (Physics.Raycast(startPosition, direction, out hit, direction.magnitude + innerDist + 1, m_CollisionMask))
         {
-            if (CompareTag("RotationCube"))
-            {
-                print(hit.distance + "," + direction.magnitude + "," + innerDist);
-            }
             if (hit.distance < direction.magnitude + innerDist)
             {
                 transform.parent.position += direction.normalized * (hit.distance - innerDist);
@@ -65,6 +58,9 @@ public class cubePhysicsController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        m_rigidbody.velocity = Vector3.zero;
+        var oldLayer = gameObject.layer;
+        gameObject.layer = LayerMask.NameToLayer("Self");
         if (m_rotationRoot != null && !m_rotationRoot.IsRotating && !isHolding)
         {
 
@@ -73,5 +69,6 @@ public class cubePhysicsController : MonoBehaviour
                 UpdateCharacterPosition(UpdateByGravity(Time.deltaTime) * m_rigidbody.mass, transform.position, (downDetection.position - transform.position).magnitude);
             }
         }
+        gameObject.layer = oldLayer;
     }
 }

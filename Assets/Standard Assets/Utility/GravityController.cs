@@ -114,10 +114,14 @@ public class GravityController : MonoBehaviour, ITriggerComparison
             var point = m_Camera.ScreenToWorldPoint(new Vector3(x, y, 1.0f));
             var direction = (point - m_Camera.transform.position).normalized;
             //Debug.DrawLine(m_Camera.transform.position, m_Camera.transform.position + direction * m_InteractionDist, Color.red, 100);
-            if (Physics.Raycast(m_Camera.transform.position, direction, out hit, m_InteractionDist, LayerMask.GetMask("Level") | LayerMask.GetMask("Interaction")))
+            if (Physics.Raycast(m_Camera.transform.position, direction, out hit, m_InteractionDist, LayerMask.GetMask("Trigger") | LayerMask.GetMask("Level") | LayerMask.GetMask("Interaction")))
             {
                 
                 m_InteractionCube = hit.collider.gameObject.GetComponent<IInteractionCube>();
+                if (m_InteractionCube != m_PreviousInteractionCube && m_PreviousInteractionCube != null)
+                {
+                    m_PreviousInteractionCube.EndInteraction();
+                }
                 if (m_InteractionCube != null && m_InteractionPoint)
                 {
                     m_InteractionPoint.OnFocus();
@@ -125,7 +129,7 @@ public class GravityController : MonoBehaviour, ITriggerComparison
             }
             else
             {
-                if (m_IsInteracting)
+                if (m_IsInteracting && m_PreviousInteractionCube != null)
                 {
                     m_PreviousInteractionCube.EndInteraction();
                 }
