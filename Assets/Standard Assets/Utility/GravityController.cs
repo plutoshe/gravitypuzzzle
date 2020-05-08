@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 
-public class GravityController : MonoBehaviour
+public class GravityController : MonoBehaviour, ITriggerComparison
 {
     // Start is called before the first frame update
     public float m_NormalGravityAccleration = 9.8f;
@@ -17,14 +17,17 @@ public class GravityController : MonoBehaviour
     private float camYaw = 0;
     public float m_SpeedV = 2;
     public Camera m_Camera;
-    private Vector3 downDetection;
+    private Transform downDetection;
+    LayerMask m_CollisionMask;
+
     void Start()
     {
         m_rigidbody = GetComponent<Rigidbody>();
         m_rotationRoot = transform.parent.GetComponent<GravityDirectionRoot>();
         m_Camera = GetComponentInChildren<Camera>();
-        downDetection = transform.Find("Down").localPosition;
+        downDetection = transform.Find("Down");
         m_IsInteracting = false;
+        m_CollisionMask = LayerMask.GetMask("Level") | LayerMask.GetMask("Default") | LayerMask.GetMask("Interaction");
     }
 
     // Update is called once per frame
@@ -32,7 +35,10 @@ public class GravityController : MonoBehaviour
     {
         return i_deltaTime * transform.up * -m_NormalGravityAccleration;
     }
-
+    public bool CompareIdentifier(string identifier)
+    {
+        return "player" == identifier;
+    }
     private Vector3 TackleInput()
     {
         Vector3 movement = new Vector3(0, 0, 0);
@@ -58,9 +64,10 @@ public class GravityController : MonoBehaviour
     private bool isGrounded()
     {
         RaycastHit hit;
-        if (Physics.Raycast(transform.position, downDetection, out hit, 100, ~LayerMask.GetMask("Player")))
+        var direction = downDetection.position - transform.position;
+        if (Physics.Raycast(transform.position, direction, out hit, direction.magnitude + 10, m_CollisionMask))
         {
-            if (hit.distance < downDetection.magnitude + 0.1f)
+            if (hit.distance < direction.magnitude + 0.1f)
             {
                 return true;
             }
@@ -72,11 +79,11 @@ public class GravityController : MonoBehaviour
     {
         RaycastHit hit;
         //Debug.DrawLine(startPosition, startPosition + 100 * direction, Color.red, 100);
-        if (Physics.Raycast(startPosition, direction, out hit, direction.magnitude + innerDist + 1, ~LayerMask.GetMask("Player")))
+        if (Physics.Raycast(startPosition, direction, out hit, direction.magnitude + innerDist + 1, m_CollisionMask))
         {
             if (hit.distance < direction.magnitude + innerDist)
             {
-                transform.parent.position += direction * (hit.distance - innerDist);
+                transform.parent.position += direction.normalized * (hit.distance - innerDist);
             }
             else
             {
@@ -107,7 +114,7 @@ public class GravityController : MonoBehaviour
             var point = m_Camera.ScreenToWorldPoint(new Vector3(x, y, 1.0f));
             var direction = (point - m_Camera.transform.position).normalized;
             //Debug.DrawLine(m_Camera.transform.position, m_Camera.transform.position + direction * m_InteractionDist, Color.red, 100);
-            if (Physics.Raycast(m_Camera.transform.position, direction, out hit, m_InteractionDist, LayerMask.GetMask("Level")))
+            if (Physics.Raycast(m_Camera.transform.position, direction, out hit, m_InteractionDist, LayerMask.GetMask("Level") | LayerMask.GetMask("Interaction")))
             {
                 
                 m_InteractionCube = hit.collider.gameObject.GetComponent<IInteractionCube>();
@@ -132,7 +139,6 @@ public class GravityController : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0) && m_InteractionCube != null)
         {
-            print("!####");
             m_InteractionCube.StartInteraction(this);
             m_IsInteracting = true;
         }
@@ -149,7 +155,7 @@ public class GravityController : MonoBehaviour
         {
             if (!isGrounded())
             {
-                UpdateCharacterPosition(UpdateByGravity(Time.deltaTime) * m_rigidbody.mass, transform.position + downDetection, 0);
+                UpdateCharacterPosition(UpdateByGravity(Time.deltaTime) * m_rigidbody.mass, transform.position, (downDetection.position - transform.position).magnitude);
             }
             Vector3 desiredMove = TackleInput() * Time.deltaTime;
             

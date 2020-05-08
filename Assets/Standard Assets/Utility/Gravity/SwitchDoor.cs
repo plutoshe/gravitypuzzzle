@@ -24,10 +24,10 @@ public class SwitchDoor : MonoBehaviour, ITriggerSwitchFunction
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            StartTriggering();
-        }
+        //if (Input.GetKeyDown(KeyCode.Q))
+        //{
+        //    StartTriggering();
+        //}
         if (isMoving)
         {
             elapsedTime += Time.deltaTime;

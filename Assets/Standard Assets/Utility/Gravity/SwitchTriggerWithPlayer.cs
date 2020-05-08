@@ -3,7 +3,10 @@ using System.Collections;
 
 public class SwitchTriggerWithPlayer : MonoBehaviour
 {
-    ITriggerSwitchFunction m_Binding;
+    public GameObject m_Binding;
+    public string m_CompareIdentifier;
+    public float m_TriggerWaitTime;
+    private ITriggerSwitchFunction switchTrigger;
     // Use this for initialization
     void Start()
     {
@@ -15,11 +18,26 @@ public class SwitchTriggerWithPlayer : MonoBehaviour
     {
 
     }
+    IEnumerator TriggerringStart()
+    {
+
+        yield return new WaitForSeconds(m_TriggerWaitTime);
+        switchTrigger.StartTriggering();
+    }
+
     void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+
+        if (other.GetComponent<ITriggerComparison>() != null)
         {
-            m_Binding.StartTriggering();
+            if (other.GetComponent<ITriggerComparison>().CompareIdentifier(m_CompareIdentifier))
+            {
+                switchTrigger = m_Binding.GetComponent<ITriggerSwitchFunction>();
+                if (switchTrigger != null)
+                {
+                    StartCoroutine(TriggerringStart());
+                }
+            }
         }        
     }
 }

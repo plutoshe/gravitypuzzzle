@@ -11,3 +11,9 @@ public interface ITriggerSwitchFunction
 {
     void StartTriggering();
 }
+
+
+public interface ITriggerComparison
+{
+    bool CompareIdentifier(string identifier);
+}

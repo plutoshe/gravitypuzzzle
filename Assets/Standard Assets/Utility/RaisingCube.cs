@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class RaisingCube : MonoBehaviour, IInteractionCube
+public class RaisingCube : MonoBehaviour, IInteractionCube, ITriggerComparison
 {
     private float m_followingOffset;
     private bool m_isFollowing;
     private GravityController m_player;
+    public string m_triggerIdentifer;
     // Use this for initialization
     void Start()
     {
@@ -26,7 +27,6 @@ public class RaisingCube : MonoBehaviour, IInteractionCube
 
     public void StartInteraction(GravityController i_player)
     {
-        print("!!!!!!!!");
         m_player = i_player;
         m_followingOffset = (transform.parent.position - m_player.m_Camera.transform.position).magnitude;
         
@@ -35,5 +35,10 @@ public class RaisingCube : MonoBehaviour, IInteractionCube
     public void EndInteraction()
     {
         m_isFollowing = false;
+    }
+
+    public bool CompareIdentifier(string identifier)
+    {
+        return m_triggerIdentifer == identifier;
     }
 }
