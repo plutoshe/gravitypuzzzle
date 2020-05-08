@@ -4,8 +4,5 @@ using UnityEngine;
 
 public class ClickDestory : MonoBehaviour {
 
-    void OnMouseDown()
-    {
-        Destroy(this.gameObject);
-    }
+
 }
